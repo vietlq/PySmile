@@ -17,6 +17,10 @@ ALLOWED_FORMATS = ('png', 'gif', 'jpg', 'jpeg', 'bmp', 'pdf')
 def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
     input_files = glob.glob(src_dir + '/' + input_pattern)
     
+    if len(input_files) < 1:
+        print "No files with specified pattern found. Try another pattern."
+        return 0
+    
     print "Found %s matched files:" % len(input_files)
     
     for in_file in input_files:
@@ -49,16 +53,17 @@ def main():
     parser.add_option("-s", "--source-dir", dest="src_dir", help="Source directory to fetch images")
     parser.add_option("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
     parser.add_option("--ip", "--input-pattern", dest="input_pattern", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
-    parser.add_option("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed extensions: ['png', 'gif', 'jpg', 'bmp', 'pdf']")
+    parser.add_option("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS))
     (options, args) = parser.parse_args()
     cwd = os.getcwd()
-    print options
+    #print options
     
     if not options.input_pattern:
         parser.print_help()
         return -1
     
     if options.output_ext:
+        options.output_ext = options.output_ext.lower()
         if options.output_ext not in ALLOWED_FORMATS:
             print "Output formats must be in %s" % str(ALLOWED_FORMATS)
             return -1
