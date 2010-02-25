@@ -58,41 +58,51 @@ def main():
     cwd = os.getcwd()
     #print options
     
+    # Mandate input pattern
     if not options.input_pattern:
         parser.print_help()
         return -1
     
+    # Verify output formats
     if options.output_ext:
         options.output_ext = str(options.output_ext).lower()
         if options.output_ext not in ALLOWED_FORMATS:
             print "Output formats must be in %s" % str(ALLOWED_FORMATS)
             return -1
     
+    # If source directory is missing, assign current working directory
     if not options.src_dir:
         options.src_dir = cwd
     
+    # If destination directory is missing, assign current working directory
     if not options.dest_dir:
         options.dest_dir = cwd
     
+    # Verify existense of source directory
     if not os.path.isdir(options.src_dir):
         print 'Invalid the SOURCE directory!'
         return -1
     
+    # Verify existense of destination directory
     if not os.path.isdir(options.dest_dir):
         print 'Invalid the DESTINATION directory!'
         return -1
     
+    # Verify that user has permission to read source directory
     if not os.access(options.src_dir, os.R_OK):
         print 'You do not have permission to read the SOURCE directory!'
         return -1
     
+    # Verify that user has permission to write destination directory
     if not os.access(options.dest_dir, os.W_OK):
         print 'You do not have permission to write to the DESTINATION directory!'
         return -1
     
+    # Convert source & destination directories to their full absolute paths
     options.src_dir = os.path.realpath(options.src_dir)
     options.dest_dir = os.path.realpath(options.dest_dir)
     
+    # Note template to the user
     note = """
     Please review before proceeding to batch coversion:
 ----------------------------------------------------------------
@@ -100,12 +110,16 @@ def main():
     The destination dir: %s
     The input pattern: %s
     The output format: %s
-    Do you want to proceed? [Y/n]
-    """
+    Do you want to proceed? [Y/n] """
     
-    print note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext)
+    # Print summary and get confirmation to proceed
+    user_input = raw_input( note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext) )
     
-    batch_convert(src_dir=options.src_dir, input_pattern=options.input_pattern, output_ext=options.output_ext, dest_dir=options.dest_dir)
+    if ('' == user_input) or (user_input[0] in ('y', 'Y')):
+        # Proceed if user wants
+        batch_convert(src_dir=options.src_dir, input_pattern=options.input_pattern, output_ext=options.output_ext, dest_dir=options.dest_dir)
+    else:
+        print 'Bye!'
 
 if __name__ == "__main__":
     main()
