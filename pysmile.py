@@ -63,7 +63,7 @@ def main():
         return -1
     
     if options.output_ext:
-        options.output_ext = options.output_ext.lower()
+        options.output_ext = str(options.output_ext).lower()
         if options.output_ext not in ALLOWED_FORMATS:
             print "Output formats must be in %s" % str(ALLOWED_FORMATS)
             return -1
