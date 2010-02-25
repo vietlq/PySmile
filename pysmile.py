@@ -115,12 +115,13 @@ def main():
     note = note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext)
     ask_user = 'Do you want to proceed? [Y/n] '
     
+    # Print summary of inputs
     print note
     
     if options.accept_quietly:
         user_input = 'Y'
     else:
-        # Print summary and get confirmation to proceed
+        # Get confirmation to proceed
         user_input = raw_input(ask_user)
     
     if ('' == user_input) or (user_input[0] in ('y', 'Y')):
