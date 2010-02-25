@@ -54,6 +54,7 @@ def main():
     parser.add_option("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
     parser.add_option("--ip", "--input-pattern", dest="input_pattern", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
     parser.add_option("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS))
+    parser.add_option("-q", "--quiet", action="store_true", dest="accept_quietly", help="Convert files without confirmation")
     (options, args) = parser.parse_args()
     cwd = os.getcwd()
     #print options
@@ -110,10 +111,17 @@ def main():
     The destination dir: %s
     The input pattern: %s
     The output format: %s
-    Do you want to proceed? [Y/n] """
+    """
+    note = note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext)
+    ask_user = 'Do you want to proceed? [Y/n] '
     
-    # Print summary and get confirmation to proceed
-    user_input = raw_input( note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext) )
+    print note
+    
+    if options.accept_quietly:
+        user_input = 'Y'
+    else:
+        # Print summary and get confirmation to proceed
+        user_input = raw_input(ask_user)
     
     if ('' == user_input) or (user_input[0] in ('y', 'Y')):
         # Proceed if user wants
