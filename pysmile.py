@@ -41,7 +41,7 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
                 im = Image.open(in_file)
                 im.save(final_out)
             else:
-                print "The file %s is cannot be read!" % in_file
+                print "The input file %s cannot be read!" % in_file
         else:
             print "The path %s is not a file!" % in_file
     
