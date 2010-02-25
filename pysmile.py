@@ -74,13 +74,6 @@ def main():
     if not options.dest_dir:
         options.dest_dir = cwd
     
-    """
-    Verify that:
-    1. You can read from options.src_dir
-    2. You can write to options.dest_dir
-    3. Input pattern does not have illegal file names (especially / and \)
-    """
-    
     if not os.path.isdir(options.src_dir):
         print 'Invalid the SOURCE directory!'
         return -1
