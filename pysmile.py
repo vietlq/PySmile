@@ -104,7 +104,7 @@ def main():
     options.dest_dir = os.path.realpath(options.dest_dir)
     
     # Note template to the user
-    note = """
+    summary = """
     Please review before proceeding to batch coversion:
 ----------------------------------------------------------------
     The source dir: %s
@@ -112,11 +112,11 @@ def main():
     The input pattern: %s
     The output format: %s
     """
-    note = note % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext)
+    summary = summary % (options.src_dir, options.dest_dir, options.input_pattern, options.output_ext)
     ask_user = 'Do you want to proceed? [Y/n] '
     
     # Print summary of inputs
-    print note
+    print summary
     
     if options.accept_quietly:
         user_input = 'Y'
