@@ -14,8 +14,11 @@ import argparse
 
 ALLOWED_FORMATS = ('png', 'gif', 'jpg', 'jpeg', 'bmp', 'pdf')
 
-def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None, size_ratio = 100):
-    input_files = glob.glob(src_dir + '/' + input_pattern)
+def batch_convert(input_pattern, dest_dir, output_ext = None, size_ratio = 100):
+    # Expand ~ to $HOME, then pass to glob
+    input_files = []
+    for pat in input_pattern:
+        input_files += glob.glob(os.path.expanduser(pat))
 
     if len(input_files) < 1:
         print("No files with specified pattern found. Try another pattern.")
@@ -23,6 +26,7 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None, si
 
     print("Found %s matched files:" % len(input_files))
 
+    count = 0;
     for in_file in input_files:
         if os.path.isfile(in_file):
             if os.access(in_file, os.R_OK):
@@ -36,7 +40,8 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None, si
 
                 final_out = dest_dir + '/' + out_file
 
-                print("Converting %s ===> %s" % (temp_file_name, out_file))
+                count += 1
+                print("%d) %s" % (count, temp_file_name))
 
                 im = Image.open(in_file)
                 if size_ratio != 100:
@@ -55,11 +60,10 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None, si
 def parse_input():
     parser = argparse.ArgumentParser(description='Process Images in batches.')
 
-    parser.add_argument("-s", "--source-dir", dest="src_dir", help="Source directory to fetch images")
     parser.add_argument("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
-    parser.add_argument("-i", "--input-pattern", dest="input_pattern", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
-    parser.add_argument("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS))
-    parser.add_argument("-r", "--size-ratio", dest="size_ratio", help="Whether to resize, in %%. Defaults to 100", default=100)
+    parser.add_argument("input_pattern", nargs="+", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
+    parser.add_argument("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS), default=None)
+    parser.add_argument("-r", "--size-ratio", dest="size_ratio", type=int, help="Whether to resize, in %%. Defaults to 100", default=100)
     parser.add_argument("-q", "--quiet", action="store_true", dest="accept_quietly", help="Convert files without confirmation")
 
     args = parser.parse_args()
@@ -70,34 +74,20 @@ def parse_input():
         parser.print_help()
         return None
 
-    # Verify output formats
+    # Verify output formats: Either None or ALLOWED_FORMATS
     if args.output_ext:
         args.output_ext = str(args.output_ext).lower()
         if args.output_ext not in ALLOWED_FORMATS:
             print("Output formats must be in %s" % str(ALLOWED_FORMATS))
             return None
 
-    # If source directory is missing, assign current working directory
-    if not args.src_dir:
-        args.src_dir = cwd
-
     # If destination directory is missing, assign current working directory
     if not args.dest_dir:
         args.dest_dir = cwd
 
-    # Verify existense of source directory
-    if not os.path.isdir(args.src_dir):
-        print('Invalid the SOURCE directory!')
-        return None
-
     # Verify existense of destination directory
     if not os.path.isdir(args.dest_dir):
         print('Invalid the DESTINATION directory!')
-        return None
-
-    # Verify that user has permission to read source directory
-    if not os.access(args.src_dir, os.R_OK):
-        print('You do not have permission to read the SOURCE directory!')
         return None
 
     # Verify that user has permission to write destination directory
@@ -111,23 +101,30 @@ def parse_input():
         print('Invalid size ratio! Must be a positive integer!')
         return None
 
-    # Convert source & destination directories to their full absolute paths
-    args.src_dir = os.path.realpath(args.src_dir)
+    # Convert the destination directory to its full absolute path
     args.dest_dir = os.path.realpath(args.dest_dir)
 
     return args
 
 def process_images(args):
+    # If no conversion or resizing needed, just skipt
+    if args.size_ratio == 100 and not args.output_ext:
+        print("You can simply copy files over in this case!")
+        return
+
+    if args.output_ext:
+        output_format = args.output_ext
+    else:
+        output_format = "Keep as is"
     # Note template to the user
     summary = """
     Please review before proceeding to batch coversion:
 ----------------------------------------------------------------
-    The source dir: %s
     The destination dir: %s
-    The input pattern: %s
     The output format: %s
+    The size ratio: %d%%
     """
-    summary = summary % (args.src_dir, args.dest_dir, args.input_pattern, args.output_ext)
+    summary = summary % (args.dest_dir, output_format, args.size_ratio)
     ask_user = 'Do you want to proceed? [Y/n] '
 
     # Print summary of inputs
@@ -142,10 +139,9 @@ def process_images(args):
     if ('' == user_input) or (user_input[0] in ('y', 'Y')):
         # Proceed if user wants
         batch_convert(
-            src_dir=args.src_dir,
             input_pattern=args.input_pattern,
-            output_ext=args.output_ext,
             dest_dir=args.dest_dir,
+            output_ext=args.output_ext,
             size_ratio=args.size_ratio)
     else:
         print('Bye!')
