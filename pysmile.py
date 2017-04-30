@@ -63,7 +63,6 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
 
                 im = Image.open(in_file)
                 width, height = im.size
-                png_info = im.info
                 if resize_arg:
                     if resize_arg.type == RESIZE_RATIO:
                         size_ratio = resize_arg.value
@@ -82,7 +81,17 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
                             im.thumbnail(size, Image.ANTIALIAS)
                     else:
                         raise "Invalid ResizeArg type: %d" % resize_arg.type
-                im.save(final_out, **png_info)
+
+                # Handle corner cases for each output format
+                if output_ext == 'png':
+                    png_info = im.info
+                    im.save(final_out, **png_info)
+                elif output_ext == 'pdf':
+                    if im.mode == 'RGBA':
+                        im = im.convert('RGB')
+                    im.save(final_out)
+                else:
+                    im.save(final_out)
                 print("Saved to %s" % final_out)
             else:
                 print("The input file %s cannot be read!" % in_file)
@@ -158,6 +167,13 @@ def process_images(args):
         output_format = args.output_ext
     else:
         output_format = "Keep as is"
+
+    if hasattr(args, 'resize_arg'):
+        resize_arg_format = "%s" % args.resize_arg
+        resize_arg = args.resize_arg
+    else:
+        resize_arg_format = "N/A"
+        resize_arg = None
     # Note template to the user
     summary = """
     Please review before proceeding to batch coversion:
@@ -166,7 +182,7 @@ def process_images(args):
     The output format: %s
     The resize arg: %s
     """
-    summary = summary % (args.dest_dir, output_format, args.resize_arg)
+    summary = summary % (args.dest_dir, output_format, resize_arg_format)
     ask_user = 'Do you want to proceed? [Y/n] '
 
     # Print summary of inputs
@@ -183,7 +199,7 @@ def process_images(args):
         batch_convert(
             input_pattern=args.input_pattern,
             dest_dir=args.dest_dir,
-            resize_arg=args.resize_arg,
+            resize_arg=resize_arg,
             output_ext=args.output_ext)
     else:
         print('Bye!')
