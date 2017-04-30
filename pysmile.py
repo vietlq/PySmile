@@ -18,10 +18,10 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
     input_files = glob.glob(src_dir + '/' + input_pattern)
     
     if len(input_files) < 1:
-        print "No files with specified pattern found. Try another pattern."
+        print("No files with specified pattern found. Try another pattern.")
         return 0
     
-    print "Found %s matched files:" % len(input_files)
+    print("Found %s matched files:" % len(input_files))
     
     for in_file in input_files:
         if os.path.isfile(in_file):
@@ -36,14 +36,14 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
                 
                 final_out = dest_dir + '/' + out_file
                 
-                print "Converting %s ===> %s" % (temp_file_name, out_file)
+                print("Converting %s ===> %s" % (temp_file_name, out_file))
                 
                 im = Image.open(in_file)
                 im.save(final_out)
             else:
-                print "The input file %s cannot be read!" % in_file
+                print("The input file %s cannot be read!" % in_file)
         else:
-            print "The path %s is not a file!" % in_file
+            print("The path %s is not a file!" % in_file)
     
     return 0
 
@@ -68,7 +68,7 @@ def main():
     if options.output_ext:
         options.output_ext = str(options.output_ext).lower()
         if options.output_ext not in ALLOWED_FORMATS:
-            print "Output formats must be in %s" % str(ALLOWED_FORMATS)
+            print("Output formats must be in %s" % str(ALLOWED_FORMATS))
             return -1
     
     # If source directory is missing, assign current working directory
@@ -81,22 +81,22 @@ def main():
     
     # Verify existense of source directory
     if not os.path.isdir(options.src_dir):
-        print 'Invalid the SOURCE directory!'
+        print('Invalid the SOURCE directory!')
         return -1
     
     # Verify existense of destination directory
     if not os.path.isdir(options.dest_dir):
-        print 'Invalid the DESTINATION directory!'
+        print('Invalid the DESTINATION directory!')
         return -1
     
     # Verify that user has permission to read source directory
     if not os.access(options.src_dir, os.R_OK):
-        print 'You do not have permission to read the SOURCE directory!'
+        print('You do not have permission to read the SOURCE directory!')
         return -1
     
     # Verify that user has permission to write destination directory
     if not os.access(options.dest_dir, os.W_OK):
-        print 'You do not have permission to write to the DESTINATION directory!'
+        print('You do not have permission to write to the DESTINATION directory!')
         return -1
     
     # Convert source & destination directories to their full absolute paths
@@ -116,19 +116,19 @@ def main():
     ask_user = 'Do you want to proceed? [Y/n] '
     
     # Print summary of inputs
-    print summary
+    print(summary)
     
     if options.accept_quietly:
         user_input = 'Y'
     else:
         # Get confirmation to proceed
-        user_input = raw_input(ask_user)
+        user_input = input(ask_user)
     
     if ('' == user_input) or (user_input[0] in ('y', 'Y')):
         # Proceed if user wants
         batch_convert(src_dir=options.src_dir, input_pattern=options.input_pattern, output_ext=options.output_ext, dest_dir=options.dest_dir)
     else:
-        print 'Bye!'
+        print('Bye!')
 
 if __name__ == "__main__":
     main()
