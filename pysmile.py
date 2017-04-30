@@ -14,7 +14,7 @@ import argparse
 
 ALLOWED_FORMATS = ('png', 'gif', 'jpg', 'jpeg', 'bmp', 'pdf')
 
-def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
+def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None, size_ratio = 100):
     input_files = glob.glob(src_dir + '/' + input_pattern)
 
     if len(input_files) < 1:
@@ -39,7 +39,12 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
                 print("Converting %s ===> %s" % (temp_file_name, out_file))
 
                 im = Image.open(in_file)
+                if size_ratio != 100:
+                    width, height = im.size
+                    size = (width * size_ratio / 100., height * size_ratio / 100.)
+                    im.thumbnail(size, Image.ANTIALIAS)
                 im.save(final_out)
+                print("Saved to %s" % final_out)
             else:
                 print("The input file %s cannot be read!" % in_file)
         else:
@@ -49,25 +54,28 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Process Images in batches.')
+
     parser.add_argument("-s", "--source-dir", dest="src_dir", help="Source directory to fetch images")
     parser.add_argument("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
     parser.add_argument("-i", "--input-pattern", dest="input_pattern", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
     parser.add_argument("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS))
+    parser.add_argument("-r", "--size-ratio", dest="size_ratio", help="Whether to resize, in %%. Defaults to 100", default=100)
     parser.add_argument("-q", "--quiet", action="store_true", dest="accept_quietly", help="Convert files without confirmation")
+
     args = parser.parse_args()
     cwd = os.getcwd()
 
     # Mandate input pattern
     if not args.input_pattern:
         parser.print_help()
-        return -1
+        return None
 
     # Verify output formats
     if args.output_ext:
         args.output_ext = str(args.output_ext).lower()
         if args.output_ext not in ALLOWED_FORMATS:
             print("Output formats must be in %s" % str(ALLOWED_FORMATS))
-            return -1
+            return None
 
     # If source directory is missing, assign current working directory
     if not args.src_dir:
@@ -80,22 +88,28 @@ def parse_input():
     # Verify existense of source directory
     if not os.path.isdir(args.src_dir):
         print('Invalid the SOURCE directory!')
-        return -1
+        return None
 
     # Verify existense of destination directory
     if not os.path.isdir(args.dest_dir):
         print('Invalid the DESTINATION directory!')
-        return -1
+        return None
 
     # Verify that user has permission to read source directory
     if not os.access(args.src_dir, os.R_OK):
         print('You do not have permission to read the SOURCE directory!')
-        return -1
+        return None
 
     # Verify that user has permission to write destination directory
     if not os.access(args.dest_dir, os.W_OK):
         print('You do not have permission to write to the DESTINATION directory!')
-        return -1
+        return None
+
+    # Verify that size ratio is a positive integer
+    args.size_ratio = int(args.size_ratio)
+    if args.size_ratio < 1:
+        print('Invalid size ratio! Must be a positive integer!')
+        return None
 
     # Convert source & destination directories to their full absolute paths
     args.src_dir = os.path.realpath(args.src_dir)
@@ -127,12 +141,19 @@ def process_images(args):
 
     if ('' == user_input) or (user_input[0] in ('y', 'Y')):
         # Proceed if user wants
-        batch_convert(src_dir=args.src_dir, input_pattern=args.input_pattern, output_ext=args.output_ext, dest_dir=args.dest_dir)
+        batch_convert(
+            src_dir=args.src_dir,
+            input_pattern=args.input_pattern,
+            output_ext=args.output_ext,
+            dest_dir=args.dest_dir,
+            size_ratio=args.size_ratio)
     else:
         print('Bye!')
 
 def main():
-    process_images(parse_input())
+    args = parse_input()
+    if args:
+        process_images(args)
 
 if __name__ == "__main__":
     main()
