@@ -47,7 +47,7 @@ def batch_convert(src_dir, input_pattern, output_ext = None, dest_dir = None):
 
     return 0
 
-def main():
+def parse_input():
     parser = argparse.ArgumentParser(description='Process Images in batches.')
     parser.add_argument("-s", "--source-dir", dest="src_dir", help="Source directory to fetch images")
     parser.add_argument("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
@@ -101,6 +101,9 @@ def main():
     args.src_dir = os.path.realpath(args.src_dir)
     args.dest_dir = os.path.realpath(args.dest_dir)
 
+    return args
+
+def process_images(args):
     # Note template to the user
     summary = """
     Please review before proceeding to batch coversion:
@@ -127,6 +130,9 @@ def main():
         batch_convert(src_dir=args.src_dir, input_pattern=args.input_pattern, output_ext=args.output_ext, dest_dir=args.dest_dir)
     else:
         print('Bye!')
+
+def main():
+    process_images(parse_input())
 
 if __name__ == "__main__":
     main()
