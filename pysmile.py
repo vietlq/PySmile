@@ -60,7 +60,7 @@ def handle_resize_arg(im, resize_arg):
         else:
             raise "Invalid ResizeArg type: %d" % resize_arg.type
 
-def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
+def batch_convert(input_pattern, dest_dir, resize_arg, output_ext=None, gif_trans=False):
     input_files = patterns_to_paths(input_pattern)
 
     if len(input_files) < 1:
@@ -98,7 +98,7 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
             # Preserve PNG information (transparency, gamma, dpi)
             png_info = im.info
             im.save(final_out, **png_info)
-        elif output_ext == 'gif':
+        elif output_ext == 'gif' and gif_trans:
             # Palette-based
             if im.mode == 'P':
                 if 'transparency' in im.info:
@@ -112,7 +112,7 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
                 im.save(final_out, transparency=255)
             else:
                 im.save(final_out)
-        elif output_ext in ('pdf', 'jpg', 'jpeg', 'bmp'):
+        elif output_ext in ('pdf', 'jpg', 'jpeg', 'bmp', 'gif'):
             if im.mode == 'RGBA':
                 # Convert transparent background to white and guarantee anti-aliasing
                 im = image_conv_util.pure_pil_alpha_to_color_v2(im)
@@ -133,6 +133,7 @@ def parse_input():
     parser.add_argument("-d", "--dest-dir", dest="dest_dir", help="Destination directory to writen processed images")
     parser.add_argument("input_pattern", nargs="+", help="Look for files that match some pattern. E.g. *.png or pic*cool*")
     parser.add_argument("-o", "--output-format", dest="output_ext", help="Output format/extension to save all images. If empty, original format of images is preserved. Allowed output extensions: %s" % str(ALLOWED_FORMATS), default=None)
+    parser.add_argument("-t", "--gif-transparency", dest="gif_trans", action='store_true', help="Preserve transparency when converting to GIF. Note: May yield lower quality output.", default=False)
     parser.add_argument("-q", "--quiet", action="store_true", dest="accept_quietly", help="Convert files without confirmation")
 
     args = parser.parse_args()
@@ -223,7 +224,8 @@ def process_images(args):
             input_pattern=args.input_pattern,
             dest_dir=args.dest_dir,
             resize_arg=resize_arg,
-            output_ext=args.output_ext)
+            output_ext=args.output_ext,
+            gif_trans=args.gif_trans)
     else:
         print('Bye!')
 
