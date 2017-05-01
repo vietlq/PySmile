@@ -15,6 +15,9 @@ def alpha_to_color(image, color=(255, 255, 255)):
     image -- PIL RGBA Image object
     color -- Tuple r, g, b (default 255, 255, 255)
 
+    Remember to convert to RGB before saving to non-RGBA formats:
+    new_im = im.convert('RGB')
+
     """
     x = np.array(image)
     r, g, b, a = np.rollaxis(x, axis=-1)

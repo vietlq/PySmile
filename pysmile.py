@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 """
-@author             Le Quoc Viet
-@version            0.4
-@brief
-@description
-@modified
+@author             Le Quoc Viet <viet@code2.pro>
+@version            0.5
+@brief              Convert image formats, resize images in batches
+@description        Convert image formats, resize images in batches
+@modified           May 1, 2017
 """
 
 import os, sys, glob, argparse
@@ -94,11 +94,12 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
 
         # Handle corner cases for each output format
         if output_ext == 'png':
+            # Preserve PNG information (transparency, gamma, dpi)
             png_info = im.info
             im.save(final_out, **png_info)
         elif output_ext in ('pdf', 'jpg', 'jpeg', 'gif', 'bmp'):
             if im.mode == 'RGBA':
-                #im = im.convert('RGB')
+                # Convert transparent background to white and guarantee anti-aliasing
                 im = image_conv_util.pure_pil_alpha_to_color_v2(im)
             im.save(final_out)
         else:
@@ -106,7 +107,7 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
         print("Saved to %s" % final_out)
 
 def parse_input():
-    parser = argparse.ArgumentParser(description='Process Images in batches.')
+    parser = argparse.ArgumentParser(description='Process images in batches.')
 
     # All the arguments in this group indicate size/dimension
     group = parser.add_mutually_exclusive_group()
