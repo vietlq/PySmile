@@ -24,25 +24,37 @@ Without simple and affective tools, you won't be able to accomplish those tasks 
 ### Convert `*.png` to `pdf`
 
 ```
-./pysmile.py -i ~/Downloads/*.png -o pdf -d ExportFolder
+./pysmile.py -o pdf -d ExportFolder ~/Downloads/*.png
 ```
 
 ### Resize to 50% and Keep Format
 
 ```
-./pysmile.py -i ~/images/* -r 50 -d ExportFolder
+./pysmile.py -r 50 -d ExportFolder ~/images/*
 ```
 
 ### Resize to Fixed Width 200px and Keep Format
 
 ```
-./pysmile.py -i ~/images/* --width 200 -d ExportFolder
+./pysmile.py --width 200 -d ExportFolder ~/images/*
 ```
 
 ### Resize `secret*.bmp` to Fixed Height 200px to JPEG
 
 ```
-./pysmile.py -i ~/images/secret*.bmp -o jpeg --height 200 -d ExportFolder
+./pysmile.py -o jpeg --height 200 -d ExportFolder ~/images/secret*.bmp
+```
+
+### Single Input File
+
+```
+./pysmile.py -o png --height 200 -d ExportFolder ~/images/single.jpg
+```
+
+### Multiple Input Patterns
+
+```
+./pysmile.py -o png --height 200 -d ExportFolder ~/images/single.jpg ~/Downloads/*.gif ~/Desktop/*hey*.png
 ```
 
 ### For Detailed Usage
