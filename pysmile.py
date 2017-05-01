@@ -39,26 +39,55 @@ def patterns_to_paths(input_pattern):
         input_files += glob.glob(os.path.expanduser(pat))
     return input_files
 
-def handle_resize_arg(im, resize_arg):
-    width, height = im.size
+def handle_image_resize(image, resize_arg):
+    width, height = image.size
     if resize_arg:
         if resize_arg.type == RESIZE_RATIO:
             size_ratio = resize_arg.value
             if size_ratio != 100:
                 size = (width * size_ratio / 100., height * size_ratio / 100.)
-                im.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.ANTIALIAS)
         elif resize_arg.type == RESIZE_WIDTH:
             target_width = resize_arg.value
             if width != target_width:
                 size = (target_width, 1.0 * height * target_width / width)
-                im.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.ANTIALIAS)
         elif resize_arg.type == RESIZE_HEIGHT:
             target_height = resize_arg.value
             if height != target_height:
                 size = (1.0 * width * target_height / height, target_height)
-                im.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.ANTIALIAS)
         else:
             raise "Invalid ResizeArg type: %d" % resize_arg.type
+
+def handle_image_conversion(image, output_ext, final_out, gif_trans):
+    # Handle corner cases for each output format
+    if output_ext == 'png':
+        # Preserve PNG information (transparency, gamma, dpi)
+        png_info = image.info
+        image.save(final_out, **png_info)
+    elif output_ext == 'gif' and gif_trans:
+        # Palette-based
+        if image.mode == 'P':
+            if 'transparency' in image.info:
+                image.save(final_out, transparency=image.info['transparency'])
+            else:
+                image.save(final_out)
+        elif image.mode == 'RGBA':
+            # http://www.pythonclub.org/modules/pil/convert-png-gif
+            image = image_conv_util.convert_to_palette(image)
+            # The transparency index is 255
+            image.save(final_out, transparency=255)
+        else:
+            image.save(final_out)
+    elif output_ext in ('pdf', 'jpg', 'jpeg', 'bmp', 'gif'):
+        if image.mode == 'RGBA':
+            # Convert transparent background to white and guarantee anti-aliasing
+            image = image_conv_util.pure_pil_alpha_to_color_v2(image)
+        image.save(final_out)
+    else:
+        image.save(final_out)
+    print("Saved to %s" % final_out)
 
 def batch_convert(input_pattern, dest_dir, resize_arg, output_ext=None, gif_trans=False):
     input_files = patterns_to_paths(input_pattern)
@@ -89,37 +118,11 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext=None, gif_tran
         count += 1
         print("%d) %s" % (count, temp_file_name))
 
-        im = Image.open(in_file)
+        image = Image.open(in_file)
         # Resize the image in-memory
-        handle_resize_arg(im, resize_arg)
-
-        # Handle corner cases for each output format
-        if output_ext == 'png':
-            # Preserve PNG information (transparency, gamma, dpi)
-            png_info = im.info
-            im.save(final_out, **png_info)
-        elif output_ext == 'gif' and gif_trans:
-            # Palette-based
-            if im.mode == 'P':
-                if 'transparency' in im.info:
-                    im.save(final_out, transparency=im.info['transparency'])
-                else:
-                    im.save(final_out)
-            elif im.mode == 'RGBA':
-                # http://www.pythonclub.org/modules/pil/convert-png-gif
-                im = image_conv_util.convert_to_palette(im)
-                # The transparency index is 255
-                im.save(final_out, transparency=255)
-            else:
-                im.save(final_out)
-        elif output_ext in ('pdf', 'jpg', 'jpeg', 'bmp', 'gif'):
-            if im.mode == 'RGBA':
-                # Convert transparent background to white and guarantee anti-aliasing
-                im = image_conv_util.pure_pil_alpha_to_color_v2(im)
-            im.save(final_out)
-        else:
-            im.save(final_out)
-        print("Saved to %s" % final_out)
+        handle_image_resize(image, resize_arg)
+        # Convert ans save
+        handle_image_conversion(image, output_ext, final_out, gif_trans)
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Process images in batches.')

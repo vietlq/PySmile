@@ -125,7 +125,10 @@ def convert_to_palette(image):
     image.load()
     # Get the alpha band
     alpha = image.split()[3]
-    background = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+    # To have best quality, have non-destructive RGBA to RGB conversion first
+    background = pure_pil_alpha_to_color_v2(image)
+    # Convert to palette format
+    background = background.convert('P', palette=Image.ADAPTIVE, colors=255)
     # Set all pixel values below 128 to 255, and the rest to 0
     mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
     # Paste the color of index 255 and use alpha as a mask
