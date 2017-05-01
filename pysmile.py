@@ -8,9 +8,9 @@
 @modified
 """
 
-import os, sys, glob
+import os, sys, glob, argparse
 from PIL import Image
-import argparse
+import image_conv_util
 
 ALLOWED_FORMATS = ('png', 'gif', 'jpg', 'jpeg', 'bmp', 'pdf')
 RESIZE_RATIO    = 1
@@ -96,9 +96,10 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
         if output_ext == 'png':
             png_info = im.info
             im.save(final_out, **png_info)
-        elif output_ext == 'pdf':
+        elif output_ext in ('pdf', 'jpg', 'jpeg', 'gif', 'bmp'):
             if im.mode == 'RGBA':
-                im = im.convert('RGB')
+                #im = im.convert('RGB')
+                im = image_conv_util.pure_pil_alpha_to_color_v2(im)
             im.save(final_out)
         else:
             im.save(final_out)
