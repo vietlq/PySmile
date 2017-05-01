@@ -90,6 +90,7 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
         print("%d) %s" % (count, temp_file_name))
 
         im = Image.open(in_file)
+        # Resize the image in-memory
         handle_resize_arg(im, resize_arg)
 
         # Handle corner cases for each output format
@@ -97,7 +98,21 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
             # Preserve PNG information (transparency, gamma, dpi)
             png_info = im.info
             im.save(final_out, **png_info)
-        elif output_ext in ('pdf', 'jpg', 'jpeg', 'gif', 'bmp'):
+        elif output_ext == 'gif':
+            # Palette-based
+            if im.mode == 'P':
+                if 'transparency' in im.info:
+                    im.save(final_out, transparency=im.info['transparency'])
+                else:
+                    im.save(final_out)
+            elif im.mode == 'RGBA':
+                # http://www.pythonclub.org/modules/pil/convert-png-gif
+                im = image_conv_util.convert_to_palette(im)
+                # The transparency index is 255
+                im.save(final_out, transparency=255)
+            else:
+                im.save(final_out)
+        elif output_ext in ('pdf', 'jpg', 'jpeg', 'bmp'):
             if im.mode == 'RGBA':
                 # Convert transparent background to white and guarantee anti-aliasing
                 im = image_conv_util.pure_pil_alpha_to_color_v2(im)

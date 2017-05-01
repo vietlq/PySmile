@@ -115,3 +115,19 @@ def pure_pil_alpha_to_color_v2(image, color=(255, 255, 255)):
     background = Image.new('RGB', image.size, color)
     background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
     return background
+
+def convert_to_palette(image):
+    """Convert transparent image to GIF
+    Reference: http://www.pythonclub.org/modules/pil/convert-png-gif
+
+    """
+    # Needed for split()
+    image.load()
+    # Get the alpha band
+    alpha = image.split()[3]
+    background = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+    # Set all pixel values below 128 to 255, and the rest to 0
+    mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
+    # Paste the color of index 255 and use alpha as a mask
+    background.paste(255, mask)
+    return background
