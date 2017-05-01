@@ -54,7 +54,7 @@ def handle_resize_arg(im, resize_arg):
                 im.thumbnail(size, Image.ANTIALIAS)
         elif resize_arg.type == RESIZE_HEIGHT:
             target_height = resize_arg.value
-            if width != target_width:
+            if height != target_height:
                 size = (1.0 * width * target_height / height, target_height)
                 im.thumbnail(size, Image.ANTIALIAS)
         else:
@@ -153,7 +153,7 @@ def parse_input():
     if args.width > 0:
         args.resize_arg = ResizeArg(RESIZE_WIDTH, args.width)
 
-    if args.height < 0:
+    if args.height > 0:
         args.resize_arg = ResizeArg(RESIZE_HEIGHT, args.height)
 
     # Convert the destination directory to its full absolute path
