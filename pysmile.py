@@ -196,9 +196,11 @@ def process_images(args):
         user_input = 'Y'
     else:
         # Get confirmation to proceed
-        user_input = input(ask_user)
+        user_input = 'X'
+        while user_input.upper() not in ('Y', 'N', ''):
+            user_input = input(ask_user)
 
-    if ('' == user_input) or (user_input[0] in ('y', 'Y')):
+    if user_input in ('', 'Y'):
         # Proceed if user wants
         batch_convert(
             input_pattern=args.input_pattern,
