@@ -7,7 +7,7 @@ If you are an active blogger or creating lots marketing material, you probably u
 * Create round, square thumbnails, ...
 * Generate images for Facebook Open Graph and Twitter Card
 
-Without simple and affective tools, you won't be able to accomplish those tasks efficiently. I create a too called [**PySmile**](https://github.com/vietlq/PySmile) that does automated conversion for you. The tool is a command line Python script and will add GUI soon.
+Without simple and effective tools, you won't be able to accomplish those tasks efficiently. I create a too called [**PySmile**](https://github.com/vietlq/PySmile) that does automated conversion for you. The tool is a command line Python script and will add GUI soon.
 
 ## Features
 
