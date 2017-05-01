@@ -13,7 +13,7 @@ Without simple and effective tools, you won't be able to accomplish those tasks 
 
 * Easy to run with very few input arguments
 * Supports multiple output formats: 'PNG', 'GIF', 'JPG', 'JPEG', 'BMP', 'PDF'
-* Preserves transparency (PNG => PNG, PNG => GIF)
+* Preserves transparency ({GIF, PNG} => {GIF, PNG})
 * Multiple options for resizing: By ratio, fixed width, fixed height
 * Takes wildcards for input files
 * Specify as many input files as you want
