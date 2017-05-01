@@ -13,3 +13,4 @@
 * [https://python-pillow.org/](https://python-pillow.org/)
 * [http://stackoverflow.com/questions/1233772/pil-does-not-save-transparency](http://stackoverflow.com/questions/1233772/pil-does-not-save-transparency)
 * [https://www.reddit.com/r/learnpython/comments/4g4dru/error_converting_images_to_pdf/](https://www.reddit.com/r/learnpython/comments/4g4dru/error_converting_images_to_pdf/)
+* [http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil](http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil)

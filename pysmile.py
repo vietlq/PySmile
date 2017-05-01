@@ -32,11 +32,36 @@ class ResizeArg(object):
         else:
             return 'ResizeArg(%d, %d)' % (self.type, self.value)
 
-def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
-    # Expand ~ to $HOME, then pass to glob
+def patterns_to_paths(input_pattern):
     input_files = []
     for pat in input_pattern:
+        # Expand ~ to $HOME, then pass to glob
         input_files += glob.glob(os.path.expanduser(pat))
+    return input_files
+
+def handle_resize_arg(im, resize_arg):
+    width, height = im.size
+    if resize_arg:
+        if resize_arg.type == RESIZE_RATIO:
+            size_ratio = resize_arg.value
+            if size_ratio != 100:
+                size = (width * size_ratio / 100., height * size_ratio / 100.)
+                im.thumbnail(size, Image.ANTIALIAS)
+        elif resize_arg.type == RESIZE_WIDTH:
+            target_width = resize_arg.value
+            if width != target_width:
+                size = (target_width, 1.0 * height * target_width / width)
+                im.thumbnail(size, Image.ANTIALIAS)
+        elif resize_arg.type == RESIZE_HEIGHT:
+            target_height = resize_arg.value
+            if width != target_width:
+                size = (1.0 * width * target_height / height, target_height)
+                im.thumbnail(size, Image.ANTIALIAS)
+        else:
+            raise "Invalid ResizeArg type: %d" % resize_arg.type
+
+def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
+    input_files = patterns_to_paths(input_pattern)
 
     if len(input_files) < 1:
         print("No files with specified pattern found. Try another pattern.")
@@ -46,59 +71,38 @@ def batch_convert(input_pattern, dest_dir, resize_arg, output_ext = None):
 
     count = 0;
     for in_file in input_files:
-        if os.path.isfile(in_file):
-            if os.access(in_file, os.R_OK):
-                (temp, temp_file_name) =  os.path.split(in_file)
-                (in_file_no_ext, in_file_ext) = os.path.splitext(temp_file_name)
-
-                if output_ext:
-                    out_file = in_file_no_ext + '.' + output_ext
-                else:
-                    out_file = temp_file_name
-
-                final_out = dest_dir + '/' + out_file
-
-                count += 1
-                print("%d) %s" % (count, temp_file_name))
-
-                im = Image.open(in_file)
-                width, height = im.size
-                if resize_arg:
-                    if resize_arg.type == RESIZE_RATIO:
-                        size_ratio = resize_arg.value
-                        if size_ratio != 100:
-                            size = (width * size_ratio / 100., height * size_ratio / 100.)
-                            im.thumbnail(size, Image.ANTIALIAS)
-                    elif resize_arg.type == RESIZE_WIDTH:
-                        target_width = resize_arg.value
-                        if width != target_width:
-                            size = (target_width, 1.0 * height * target_width / width)
-                            im.thumbnail(size, Image.ANTIALIAS)
-                    elif resize_arg.type == RESIZE_HEIGHT:
-                        target_height = resize_arg.value
-                        if width != target_width:
-                            size = (1.0 * width * target_height / height, target_height)
-                            im.thumbnail(size, Image.ANTIALIAS)
-                    else:
-                        raise "Invalid ResizeArg type: %d" % resize_arg.type
-
-                # Handle corner cases for each output format
-                if output_ext == 'png':
-                    png_info = im.info
-                    im.save(final_out, **png_info)
-                elif output_ext == 'pdf':
-                    if im.mode == 'RGBA':
-                        im = im.convert('RGB')
-                    im.save(final_out)
-                else:
-                    im.save(final_out)
-                print("Saved to %s" % final_out)
-            else:
-                print("The input file %s cannot be read!" % in_file)
-        else:
+        if not os.path.isfile(in_file):
             print("The path %s is not a file!" % in_file)
+            continue
+        if not os.access(in_file, os.R_OK):
+            print("The input file %s cannot be read!" % in_file)
+            continue
 
-    return 0
+        (temp, temp_file_name) =  os.path.split(in_file)
+        (in_file_no_ext, in_file_ext) = os.path.splitext(temp_file_name)
+        if output_ext:
+            out_file = in_file_no_ext + '.' + output_ext
+        else:
+            out_file = temp_file_name
+        final_out = dest_dir + '/' + out_file
+
+        count += 1
+        print("%d) %s" % (count, temp_file_name))
+
+        im = Image.open(in_file)
+        handle_resize_arg(im, resize_arg)
+
+        # Handle corner cases for each output format
+        if output_ext == 'png':
+            png_info = im.info
+            im.save(final_out, **png_info)
+        elif output_ext == 'pdf':
+            if im.mode == 'RGBA':
+                im = im.convert('RGB')
+            im.save(final_out)
+        else:
+            im.save(final_out)
+        print("Saved to %s" % final_out)
 
 def parse_input():
     parser = argparse.ArgumentParser(description='Process Images in batches.')
@@ -172,7 +176,7 @@ def process_images(args):
         resize_arg_format = "%s" % args.resize_arg
         resize_arg = args.resize_arg
     else:
-        resize_arg_format = "N/A"
+        resize_arg_format = "N/A - Keep size intact"
         resize_arg = None
     # Note template to the user
     summary = """
