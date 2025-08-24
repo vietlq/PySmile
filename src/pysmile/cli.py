@@ -12,7 +12,7 @@ import os
 import glob
 import argparse
 from PIL import Image
-import image_conv_util
+from .image_conv_util import convert_to_palette, pure_pil_alpha_to_color_v2
 
 ALLOWED_FORMATS = ("png", "gif", "jpg", "jpeg", "bmp", "pdf")
 RESIZE_RATIO = 1
@@ -81,7 +81,7 @@ def handle_image_conversion(image, output_ext, final_out, gif_trans):
                 image.save(final_out)
         elif image.mode == "RGBA":
             # http://www.pythonclub.org/modules/pil/convert-png-gif
-            image = image_conv_util.convert_to_palette(image)
+            image = convert_to_palette(image)
             # The transparency index is 255
             image.save(final_out, transparency=255)
         else:
@@ -89,7 +89,7 @@ def handle_image_conversion(image, output_ext, final_out, gif_trans):
     elif output_ext in ("pdf", "jpg", "jpeg", "bmp", "gif"):
         if image.mode == "RGBA":
             # Convert transparent background to white and guarantee anti-aliasing
-            image = image_conv_util.pure_pil_alpha_to_color_v2(image)
+            image = pure_pil_alpha_to_color_v2(image)
         image.save(final_out)
     else:
         image.save(final_out)
