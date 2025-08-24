@@ -12,7 +12,7 @@ import os
 import glob
 import argparse
 from PIL import Image
-from .image_conv_util import convert_to_palette, pure_pil_alpha_to_color_v2
+from pysmile.image_conv_util import convert_to_palette, pure_pil_alpha_to_color_v2
 
 ALLOWED_FORMATS = ("png", "gif", "jpg", "jpeg", "bmp", "pdf")
 RESIZE_RATIO = 1
@@ -51,17 +51,17 @@ def handle_image_resize(image, resize_arg):
             size_ratio = resize_arg.value
             if size_ratio != 100:
                 size = (width * size_ratio / 100.0, height * size_ratio / 100.0)
-                image.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.Resampling.LANCZOS)  # Was Image.ANTIALIAS
         elif resize_arg.type == RESIZE_WIDTH:
             target_width = resize_arg.value
             if width != target_width:
                 size = (target_width, 1.0 * height * target_width / width)
-                image.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.Resampling.LANCZOS)
         elif resize_arg.type == RESIZE_HEIGHT:
             target_height = resize_arg.value
             if height != target_height:
                 size = (1.0 * width * target_height / height, target_height)
-                image.thumbnail(size, Image.ANTIALIAS)
+                image.thumbnail(size, Image.Resampling.LANCZOS)
         else:
             raise "Invalid ResizeArg type: %d" % resize_arg.type
 

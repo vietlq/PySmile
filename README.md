@@ -99,3 +99,4 @@ optional arguments:
 * [http://stackoverflow.com/questions/1962795/how-to-get-alpha-value-of-a-png-image-with-pil](http://stackoverflow.com/questions/1962795/how-to-get-alpha-value-of-a-png-image-with-pil)
 * [http://stackoverflow.com/questions/2336522/png-vs-gif-vs-jpeg-vs-svg-when-best-to-use](http://stackoverflow.com/questions/2336522/png-vs-gif-vs-jpeg-vs-svg-when-best-to-use)
 * [http://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil](http://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil)
+* [Refer to Pillow constants](https://github.com/python-pillow/Pillow/blob/main/docs/releasenotes/10.0.0.rst#constants)
