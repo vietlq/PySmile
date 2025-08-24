@@ -13,7 +13,7 @@
 import os
 import glob
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from enum import Enum
 
 import typer
@@ -23,7 +23,7 @@ from rich.progress import track
 from rich.table import Table
 
 # Import your custom utilities (you'll need to install/create this)
-# from pysmile.image_conv_util import convert_to_palette, pure_pil_alpha_to_color_v2
+from pysmile.image_conv_util import convert_to_palette, pure_pil_alpha_to_color_v2
 
 console = Console()
 
@@ -50,6 +50,7 @@ app = typer.Typer(
 )
 
 
+'''
 # Fallback functions if pysmile is not available
 def convert_to_palette(image: Image.Image) -> Image.Image:
     """Convert RGBA image to palette mode for GIF transparency."""
@@ -67,6 +68,7 @@ def pure_pil_alpha_to_color_v2(
     background = Image.new("RGB", image.size, color)
     background.paste(image, mask=image.split()[-1])  # Use alpha channel as mask
     return background
+'''
 
 
 def get_matched_files(patterns: List[str]) -> List[Path]:
